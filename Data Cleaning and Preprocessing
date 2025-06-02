@@ -1,0 +1,74 @@
+Overview
+This project focuses on cleaning and preprocessing the Netflix Titles dataset using Python and Pandas. The goal is to:
+Handle missing values
+Remove duplicates
+Standardize column formats
+Convert date formats
+Ensure correct data types
+Save the cleaned dataset for analysis
+
+Dataset Information
+The dataset contains Netflix titles with attributes such as title, director, cast, country, release year, duration, genre, and date added.
+
+Original Dataset Columns:
+show_id
+type (Movie/TV Show)
+title
+director
+cast
+country
+date_added
+release_year
+rating
+duation
+listed_in (Genre)
+description
+
+Data Cleaning Steps
+1️⃣ Load Dataset
+import pandas as pd
+
+# Load dataset
+df = pd.read_csv('netflix_titles.csv')
+
+# View basic info
+df.info()
+df.head()
+
+2️⃣ Handle Missing Values
+df['director'] = df['director'].fillna('Unknown')
+df['cast'] = df['cast'].fillna('Unknown')
+df['country'] = df['country'].fillna('Not Available')
+df['rating'] = df['rating'].fillna('Not Rated')
+df['date_added'] = df['date_added'].fillna(df['date_added'].mode()[0])  # Fill with the most common date
+
+3️⃣ Remove Duplicates 
+df = df.drop_duplicates()
+
+4️⃣ Standardize Column Formatting
+df.columns = df.columns.str.lower().str.replace(' ', '_')  # Convert column names to lowercase
+df['type'] = df['type'].str.lower().str.strip()
+df['listed_in'] = df['listed_in'].str.lower().str.strip()
+
+5️⃣ Convert Date Formats
+df['date_added'] = pd.to_datetime(df['date_added'], errors='coerce')
+df = df.sort_values(by='date_added', ascending=True)
+
+df['year_added'] = df['date_added'].dt.year
+df['month_added'] = df['date_added'].dt.month
+df['day_added'] = df['date_added'].dt.day
+
+6️⃣ Fix Data Types
+
+df['release_year'] = df['release_year'].astype(int)
+
+df['duration'] = df['duration'].astype(str).replace('nan', '')  # Convert NaN to empty strings
+df['duration'] = df['duration'].str.extract(r'(\d+)')  # Extract numeric values only
+df['duration'] = pd.to_numeric(df['duration'], errors='coerce')  # Convert to integer
+
+df.loc[:, 'duration'] = df['duration'].fillna(df['duration'].median())  # Fill missing durations with median
+
+7️⃣ Save Cleaned Dataset
+
+df.to_csv('cleaned_netflix_titles.csv', index=False)
+df.to_excel('cleaned_netflix_titles.xlsx', index=False, sheet_name='Cleaned Data')
